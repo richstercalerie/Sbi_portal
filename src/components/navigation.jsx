@@ -1,67 +1,55 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { auth, googleProvider, signInWithPopup, signOut } from "../firebase";
 
-export const Navigation = (props) => {
+export const Navigation = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleSignIn = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+    } catch (error) {
+      console.error("Error signing in:", error);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
+
   return (
-    <nav id="menu" className="navbar navbar-default navbar-fixed-top">
+    <nav className="navbar navbar-default navbar-fixed-top">
       <div className="container">
         <div className="navbar-header">
-          <button
-            type="button"
-            className="navbar-toggle collapsed"
-            data-toggle="collapse"
-            data-target="#bs-example-navbar-collapse-1"
-          >
-            {" "}
-            <span className="sr-only">Toggle navigation</span>{" "}
-            <span className="icon-bar"></span>{" "}
-            <span className="icon-bar"></span>{" "}
-            <span className="icon-bar"></span>{" "}
-          </button>
-          <a className="navbar-brand page-scroll" href="#page-top">
-            React Landing Page
-          </a>{" "}
+          <Link className="navbar-brand page-scroll" to="/">SBI Insurance</Link>
         </div>
-
-        <div
-          className="collapse navbar-collapse"
-          id="bs-example-navbar-collapse-1"
-        >
+        <div className="collapse navbar-collapse">
           <ul className="nav navbar-nav navbar-right">
-            <li>
-              <a href="#features" className="page-scroll">
-                Features
-              </a>
-            </li>
-            <li>
-              <a href="#about" className="page-scroll">
-                About
-              </a>
-            </li>
-            <li>
-              <a href="#services" className="page-scroll">
-                Services
-              </a>
-            </li>
-            <li>
-              <a href="#portfolio" className="page-scroll">
-                Gallery
-              </a>
-            </li>
-            <li>
-              <a href="#testimonials" className="page-scroll">
-                Testimonials
-              </a>
-            </li>
-            <li>
-              <a href="#team" className="page-scroll">
-                Team
-              </a>
-            </li>
-            <li>
-              <a href="#contact" className="page-scroll">
-                Contact
-              </a>
-            </li>
+            <li><Link to="/features">Features</Link></li>
+            <li><Link to="/about">About</Link></li>
+            <li><Link to="/contact">Contact</Link></li>
+            {user ? (
+              <>
+                
+                <li><button onClick={handleSignOut} className="btn btn-danger">Sign Out</button></li>
+              </>
+            ) : (
+              <li><button onClick={handleSignIn} className="btn btn-primary">Sign In</button></li>
+            )}
+		<li><span>{user.displayName}  <br/>
+Welcome 🎉, </span></li>
           </ul>
         </div>
       </div>
